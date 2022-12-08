@@ -1,25 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import "./styles.css";
+import AddressTable from "./AddressTable";
+import Instructions from "./Instructions";
 
-function App() {
+export default function App() {
+  const [showInstructions, setShowInstrunctions] = useState(true);
+  const [data, setData] = useState();
+  useEffect(() => {
+    const getData = async () => {
+      const url = "https://jsonplaceholder.typicode.com/users";
+      try {
+        const result = await fetch(url);
+        const userData = await result.json();
+        const addressData = userData.reduce((acc, curr) => {
+          var { address } = curr;
+          const { geo } = address;
+          delete address.geo;
+
+          return [...acc, { ...address, ...geo }];
+        }, []);
+        console.log(addressData);
+
+        setData(addressData);
+        // console.log(data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    getData();
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="row">
+        <button onClick={() => setShowInstrunctions(!showInstructions)}>
+          Toggle Instructions
+        </button>
+      </div>
+      {showInstructions ? <Instructions /> : <AddressTable data={data} />}
     </div>
   );
 }
-
-export default App;
